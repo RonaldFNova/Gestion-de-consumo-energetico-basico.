@@ -1,1 +1,20 @@
-<h1>Hola mundo</h1>
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+	<div class="row justify-content-center">
+		<div class="col-md-6">
+			<div class="card shadow">
+				<div class="card-body">
+					<h2 class="card-title text-center mb-4">Gestión de Consumo y Reportes Energéticos</h2>
+					<p class="text-center">Bienvenido. Por favor, inicia sesión o regístrate para continuar.</p>
+					<div class="d-grid gap-2">
+						<a href="/login" class="btn btn-primary">Iniciar Sesión</a>
+						<a href="{{ url_for('registro') }}" class="btn btn-outline-secondary">Registrarse</a>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+{% endblock %}

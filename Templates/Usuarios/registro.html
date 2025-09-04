@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+{% block title %}Registro de Usuario{% endblock %}
+{% block content %}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-6 col-md-8">
+            <div class="card border-0 shadow-lg rounded-4">
+                <div class="card-header bg-primary text-white text-center rounded-top-4">
+                    <h2 class="mb-0">Registro de Usuario</h2>
+                </div>
+                <div class="card-body p-4">
+                    <form action="{{ url_for('registro') }}" method="POST" autocomplete="off">
+                        <div class="mb-3">
+                            <label for="nombre" class="form-label">Nombre completo</label>
+                            <input type="text" id="nombre" name="nombre" class="form-control form-control-lg" placeholder="Ej: Juan Pérez" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="correo" class="form-label">Correo electrónico</label>
+                            <input type="email" id="correo" name="correo" class="form-control form-control-lg" placeholder="Ej: juan@email.com" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="edad" class="form-label">Edad</label>
+                            <input type="number" id="edad" name="edad" class="form-control form-control-lg" min="1" max="120" placeholder="Ej: 30" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="password" class="form-label">Contraseña</label>
+                            <input type="password" id="password" name="password" class="form-control form-control-lg" placeholder="Mínimo 6 caracteres" required>
+                        </div>
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg">Registrarse</button>
+                        </div>
+                    </form>
+                </div>
+                <div class="card-footer text-center bg-light rounded-bottom-4">
+                    <small>¿Ya tienes cuenta? <a href="{{ url_for('login') }}" class="text-primary">Inicia sesión aquí</a></small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
