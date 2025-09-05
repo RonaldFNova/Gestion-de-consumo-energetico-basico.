@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+{% block title %}Editar Contraseña{% endblock %}
+{% block content %}
+<div class="container py-5">
+	<div class="row justify-content-center">
+		<div class="col-md-6">
+			<div class="card shadow border-0 rounded-4">
+				<div class="card-header bg-primary text-white text-center rounded-top-4">
+					<h4 class="mb-0">Editar Contraseña</h4>
+				</div>
+				<div class="card-body p-4">
+
+                    {% if error %}
+                        <div class="alert alert-danger text-center" role="alert">
+                            {{ error }}
+                        </div>
+                    {% endif %}
+
+					<form method="POST" action="{{ url_for('editarPerfil') }}">
+						<div class="mb-3">
+							<label for="actual" class="form-label">Contraseña Actual</label>
+							<div class="input-group">
+								<input type="password" class="form-control" id="actual" name="actual" required>
+								<button class="btn btn-outline-secondary" type="button" onclick="mostrarContraseñ('actual')">
+								</button>
+							</div>
+						</div>
+						<div class="mb-3">
+							<label for="nueva" class="form-label">Nueva Contraseña</label>
+							<div class="input-group">
+								<input type="password" class="form-control" id="nueva" name="nueva" required>
+								<button class="btn btn-outline-secondary" type="button" onclick="mostrarContraseñ('nueva')">
+								</button>
+							</div>
+						</div>
+						<div class="mb-3">
+							<label for="confirmar" class="form-label">Confirmar Nueva Contraseña</label>
+							<div class="input-group">
+								<input type="password" class="form-control" id="confirmar" name="confirmar" required>
+								<button class="btn btn-outline-secondary" type="button" onclick="mostrarContraseñ('confirmar')">
+								</button>
+							</div>
+						</div>
+						<div class="d-grid mb-3">
+							<button type="submit" class="btn btn-success btn-lg">Actualizar Contraseña</button>
+						</div>
+					</form>
+					<div class="mt-3 text-center">
+                        <a href="{{ url_for('homeUser') }}" class="btn btn-link">Volver a la página de inicio</a>
+                    </div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<script>
+    function mostrarContraseñ(inputId) {
+        const input = document.getElementById(inputId);
+    
+        if (input.type === "password") {
+            input.type = "text";
+        } else {
+            input.type = "password";
+        }
+    }
+</script>
+{% endblock %}
+

@@ -69,7 +69,6 @@ def registro():
         )
         db.session.add(nuevo_usuario)
         db.session.commit()
-
         session['usuario_id'] = nuevo_usuario.id 
 
         return redirect(url_for('homeUser')) 
@@ -121,15 +120,29 @@ def registroDatos():
 
         db.session.add(nuevo_dato)
         db.session.commit()
-        
-        return redirect(url_for('homeUser')) 
-    
+            
     else:
         usuario_id = session.get('usuario_id') 
         if not usuario_id:
             return redirect(url_for('login')) 
 
-        return render_template('Datos/formulario.html')
+    return render_template('Datos/formulario.html')
+
+
+@app.route('/reportes', methods=['GET', 'POST'])
+def reportes():
+    usuario_id = session.get('usuario_id')
+    usuario = Usuarios.query.get(usuario_id)
+
+    if request.method == 'GET':
+        if not usuario_id:
+            return redirect(url_for('login')) 
+    
+        if usuario.Roles.nombre != 'usuario':
+            return redirect(url_for('homeAdmin'))
+
+        consumos = Datos.query.filter_by(usuario_id=usuario_id).all()
+        return render_template('Reportes/consumo.html', consumos=consumos)
 
 
 @app.route('/homeUser' )
@@ -143,7 +156,7 @@ def homeUser():
     if usuario.Roles.nombre != 'usuario':
         return redirect(url_for('homeAdmin')) 
     
-    return render_template('Usuarios/home.html', usuario_id=usuario_id)
+    return render_template('Usuarios/home.html', usuario=usuario)
     
 
 @app.route('/homeAdmin')
@@ -158,6 +171,55 @@ def homeAdmin():
         return redirect(url_for('homeUser')) 
     
     return render_template('Admin/home.html', usuario_id=usuario_id)
+
+
+@app.route('/cerrarSesion')
+def cerrarSesion():
+    session.pop('usuario_id')  
+    return redirect(url_for('index'))
+
+
+@app.route('/editarPerfil', methods=['GET', 'POST'])
+def editarPerfil():
+    if request.method == 'GET':
+          
+        usuario_id = session.get('usuario_id') 
+        usuario = Usuarios.query.get(usuario_id)
+
+        if not usuario_id:
+            return redirect(url_for('login'))
+    
+        if usuario.Roles.nombre != 'usuario':
+            return redirect(url_for('homeAdmin')) 
+        
+        return render_template('Usuarios/editarPerfil.html')
+    
+    else:
+        usuario_id = session.get('usuario_id') 
+        usuario = Usuarios.query.get(usuario_id)
+
+        if not usuario_id:
+            return redirect(url_for('login'))
+    
+        if usuario.Roles.nombre != 'usuario':
+            return redirect(url_for('homeAdmin')) 
+
+        actual = request.form['actual']
+        nueva = request.form['nueva']
+        confirmar = request.form['confirmar']
+
+        if actual != usuario.password:
+            error = 'La contraseña actual es incorrecta'
+            return render_template('Usuarios/editarPerfil.html', error=error)
+        
+        if nueva != confirmar:
+            error = 'La nueva contraseña y la confirmación no coinciden'
+            return render_template('Usuarios/editarPerfil.html', error=error)
+
+        usuario.password = nueva
+        db.session.commit()
+
+        return redirect(url_for('homeUser'))
 
 
 if __name__ == '__main__':

@@ -6,7 +6,7 @@
 		<div class="col-lg-8">
 			<div class="card shadow-lg border-0 rounded-4">
 				<div class="card-header bg-primary text-white text-center rounded-top-4">
-					<h2 class="mb-0">Bienvenido a tu Panel de Usuario</h2>
+					<h2 class="mb-0">Bienvenido {{usuario.nombre}} a tu Panel de Usuario</h2>
 				</div>
 				<div class="card-body p-4">
 					<p class="lead text-center mb-4">Aquí puedes gestionar tu consumo energético, ver reportes y acceder a tus registros.</p>
@@ -25,7 +25,7 @@
 								<div class="card-body">
 									<h5 class="card-title">Ver Reportes</h5>
 									<p class="card-text">Consulta reportes diarios y mensuales de tu consumo.</p>
-									<a href="#" class="btn btn-info">Reportes</a>
+									<a href="{{ url_for('reportes') }}" class="btn btn-info">Reportes</a>
 								</div>
 							</div>
 						</div>
@@ -34,10 +34,15 @@
 								<div class="card-body">
 									<h5 class="card-title">Mi Perfil</h5>
 									<p class="card-text">Edita tus datos personales y preferencias.</p>
-									<a href="#" class="btn btn-secondary">Perfil</a>
+									<a href="{{ url_for('editarPerfil') }}" class="btn btn-secondary">Perfil</a>
 								</div>
 							</div>
 						</div>
+					</div>
+					<div class="text-center mt-4">
+						<a href="{{ url_for('cerrarSesion') }}" class="btn btn-outline-danger">
+							<i class="bi bi-box-arrow-right"></i> Cerrar sesión
+						</a>
 					</div>
 				</div>
 			</div>
