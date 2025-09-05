@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+{% block title %}Panel de Administración{% endblock %}
+{% block content %}
+<div class="container py-5">
+	<div class="row mb-4">
+		<div class="col text-center">
+			<h2 class="display-5 fw-bold text-primary">Panel de Administración</h2>
+			<p class="lead">Bienvenido, aquí puedes gestionar usuarios, registros y visualizar reportes del sistema.</p>
+		</div>
+	</div>
+	<div class="row g-4">
+		<div class="col-md-4">
+			<div class="card border-0 shadow h-100">
+				<div class="card-body text-center">
+					<i class="bi bi-people-fill display-4 text-primary mb-3"></i>
+					<h5 class="card-title">Gestión de Usuarios</h5>
+					<p class="card-text">Ver, editar o eliminar usuarios registrados en el sistema.</p>
+					<a href="{{ url_for('homeAdmin') }}" class="btn btn-outline-primary">Gestionar Usuarios</a>
+				</div>
+			</div>
+		</div>
+		<div class="col-md-4">
+			<div class="card border-0 shadow h-100">
+				<div class="card-body text-center">
+					<i class="bi bi-journal-check display-4 text-success mb-3"></i>
+					<h5 class="card-title">Registros de Consumo</h5>
+					<p class="card-text">Consulta y administra los registros de consumo energético de los usuarios.</p>
+					<a href="{{ url_for('homeAdmin') }}" class="btn btn-outline-success">Ver Registros</a>
+				</div>
+			</div>
+		</div>
+		<div class="col-md-4">
+			<div class="card border-0 shadow h-100">
+				<div class="card-body text-center">
+					<i class="bi bi-graph-up-arrow display-4 text-info mb-3"></i>
+					<h5 class="card-title">Reportes y Estadísticas</h5>
+					<p class="card-text">Visualiza reportes globales y estadísticas del sistema.</p>
+					<a href="{{ url_for('homeAdmin') }}" class="btn btn-outline-info">Ver Reportes</a>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+{% endblock %}

@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+{% block title %}Bienvenido{% endblock %}
+{% block content %}
+<div class="container py-5">
+	<div class="row justify-content-center">
+		<div class="col-lg-8">
+			<div class="card shadow-lg border-0 rounded-4">
+				<div class="card-header bg-primary text-white text-center rounded-top-4">
+					<h2 class="mb-0">Bienvenido a tu Panel de Usuario</h2>
+				</div>
+				<div class="card-body p-4">
+					<p class="lead text-center mb-4">Aquí puedes gestionar tu consumo energético, ver reportes y acceder a tus registros.</p>
+					<div class="row g-4">
+						<div class="col-md-4">
+							<div class="card h-100 text-center border-0 shadow-sm">
+								<div class="card-body">
+									<h5 class="card-title">Registrar Consumo</h5>
+									<p class="card-text">Agrega nuevos registros de consumo energético fácilmente.</p>
+									<a href="{{ url_for('formulario') }}" class="btn btn-success">Registrar</a>
+								</div>
+							</div>
+						</div>
+						<div class="col-md-4">
+							<div class="card h-100 text-center border-0 shadow-sm">
+								<div class="card-body">
+									<h5 class="card-title">Ver Reportes</h5>
+									<p class="card-text">Consulta reportes diarios y mensuales de tu consumo.</p>
+									<a href="#" class="btn btn-info">Reportes</a>
+								</div>
+							</div>
+						</div>
+						<div class="col-md-4">
+							<div class="card h-100 text-center border-0 shadow-sm">
+								<div class="card-body">
+									<h5 class="card-title">Mi Perfil</h5>
+									<p class="card-text">Edita tus datos personales y preferencias.</p>
+									<a href="#" class="btn btn-secondary">Perfil</a>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+{% endblock %}

@@ -10,14 +10,23 @@
                     <h2 class="mb-0">Iniciar Sesión</h2>
                 </div>
                 <div class="card-body p-4">
+
+                    {% if error %}
+                        <div class="alert alert-danger text-center" role="alert">
+                            {{ error }}
+                        </div>
+                    {% endif %}
+
                     <form action="{{ url_for('login') }}" method="POST" autocomplete="off">
                         <div class="mb-3">
                             <label for="correo" class="form-label">Correo electrónico</label>
-                            <input type="email" id="correo" name="correo" class="form-control form-control-lg" placeholder="Ej: juan@email.com" required>
+                            <input type="email" id="correo" name="correo" class="form-control form-control-lg"
+                                   placeholder="Ej: juan@email.com" required>
                         </div>
                         <div class="mb-3">
                             <label for="password" class="form-label">Contraseña</label>
-                            <input type="password" id="password" name="password" class="form-control form-control-lg" placeholder="Tu contraseña" required>
+                            <input type="password" id="password" name="password" class="form-control form-control-lg"
+                                   placeholder="Tu contraseña" required>
                         </div>
                         <div class="d-grid gap-2">
                             <button type="submit" class="btn btn-primary btn-lg">Ingresar</button>

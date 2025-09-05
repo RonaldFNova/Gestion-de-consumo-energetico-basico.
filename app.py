@@ -1,6 +1,6 @@
-
 from flask import Flask, render_template, request, redirect, url_for
 from flask_sqlalchemy import SQLAlchemy
+from datetime import datetime
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///GestionEnergia.db'
@@ -8,37 +8,97 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
 
-# Modelo de roles
-class Role(db.Model):
+class Roles(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    nombre = db.Column(db.String(50), unique=True, nullable=False)  # Ej: 'admin', 'usuario'
+    nombre = db.Column(db.String(50), unique=True, nullable=False) 
     descripcion = db.Column(db.String(120))
-    users = db.relationship('User', backref='role', lazy=True)
+    Usuarios = db.relationship('Usuarios', backref='Roles', lazy=True)
 
-# Modelo de usuario con relación a Role
-class User(db.Model):
+class Usuarios(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     nombre = db.Column(db.String(100), nullable=False)
     correo = db.Column(db.String(120), unique=True, nullable=False)
     password = db.Column(db.String(100), nullable=False)
-    role_id = db.Column(db.Integer, db.ForeignKey('role.id'), nullable=False)
+    Roles_id = db.Column(db.Integer, db.ForeignKey('roles.id'), nullable=False)
 
     def __repr__(self):
-        return f'<User {self.nombre} ({self.role.nombre})>'
+        return f'<Usuarios {self.nombre} ({self.Roles.nombre})>'
 
-app = Flask(__name__)
+class Login(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    usuario_id = db.Column(db.Integer, db.ForeignKey('usuarios.id'), nullable=False)
+    fecha_hora = db.Column(db.DateTime, default=datetime)
+    usuario = db.relationship('Usuarios', backref='logins')
+
+class Datos(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    usuario_id = db.Column(db.Integer, db.ForeignKey('usuarios.id'), nullable=False)
+    consumo_energia = db.Column(db.Float, nullable=False)
+    fecha_registro = db.Column(db.DateTime, default=datetime)
+    usuario = db.relationship('Usuarios', backref='datos')
 
 
 @app.route('/')
-def home():
+def index():
     return render_template('index.html')
 
 
 @app.route('/registro', methods=['GET', 'POST'])
 def registro():
     if request.method == 'POST':
-        return redirect(url_for('home'))
+        nombre = request.form['nombre']
+        correo = request.form['correo']
+
+        correoExistente = Usuarios.query.filter_by(correo=correo).first()
+
+        if correoExistente:
+            error = 'El correo ya está registrado'
+            return render_template('Usuarios/registro.html', error=error)
+        
+        password = request.form['password']
+        Usuarios_Roles = Roles.query.filter_by(nombre='usuario').first()
+        nuevo_usuario = Usuarios(
+            nombre=nombre,
+            correo=correo,
+            password=password,
+            Roles_id=Usuarios_Roles.id
+        )
+        db.session.add(nuevo_usuario)
+        db.session.commit()
+        return redirect(url_for('homeUser'))
     return render_template('Usuarios/registro.html')
+
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        correo = request.form['correo']
+        password = request.form['password']
+
+        usuario = Usuarios.query.filter_by(correo=correo, password=password).first()
+        if not usuario:
+            error = 'Correo o contraseña incorrectas'
+            return render_template('Usuarios/login.html', error=error)
+
+        usuario = Usuarios.query.get(usuario.id)
+
+        if usuario.Roles.nombre != 'admin':
+            return redirect(url_for('homeUser'))
+        
+        return redirect(url_for('homeAdmin'))
+
+    return render_template('Usuarios/login.html')
+
+
+
+@app.route('/homeAdmin', methods=['GET'])
+def homeAdmin():
+    return render_template('Admin/home.html')
+
+
+@app.route('/homeUser', methods=['GET'])
+def homeUser():
+    return render_template('Usuarios/home.html')
 
 
 @app.route('/formulario', methods=['GET', 'POST'])
@@ -47,12 +107,30 @@ def formulario():
         return redirect(url_for('home'))
     return render_template('Datos/formulario.html')
 
-@app.route('/login', methods=['GET', 'POST'])
-def login():
-    if request.method == 'POST':
-        return redirect(url_for('home'))
-    return render_template('Usuarios/login.html')
 
 if __name__ == '__main__':
-    db.create_all()
-    app.run(debug=True) 
+    with app.app_context():
+        db.create_all()
+
+        admin_Roles = Roles.query.filter_by(nombre='admin').first()
+        if not admin_Roles:
+            admin_Roles = Roles(nombre='admin', descripcion='Administrador')
+            db.session.add(admin_Roles)
+        Usuarios_Roles = Roles.query.filter_by(nombre='usuario').first()
+        if not Usuarios_Roles:
+            Usuarios_Roles = Roles(nombre='usuario', descripcion='Usuario convencional')
+            db.session.add(Usuarios_Roles)
+        db.session.commit()
+
+        admin_Usuarios = Usuarios.query.filter_by(correo='admin@email.com').first()
+        if not admin_Usuarios:
+            nuevo_admin = Usuarios(
+                nombre='Administrador',
+                correo='admin@email.com',
+                password='admin123', 
+                Roles_id=admin_Roles.id
+            )
+            db.session.add(nuevo_admin)
+            db.session.commit()
+
+    app.run(debug=True)
