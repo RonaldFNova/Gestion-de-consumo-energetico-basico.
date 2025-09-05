@@ -1,10 +1,13 @@
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for, session
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///GestionEnergia.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+app.secret_key = "jaszvfhjhfsf468hji@gfgo,.gft4"  
+
 db = SQLAlchemy(app)
 
 
@@ -31,10 +34,11 @@ class Login(db.Model):
     usuario = db.relationship('Usuarios', backref='logins')
 
 class Datos(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True)    
     usuario_id = db.Column(db.Integer, db.ForeignKey('usuarios.id'), nullable=False)
-    consumo_energia = db.Column(db.Float, nullable=False)
-    fecha_registro = db.Column(db.DateTime, default=datetime)
+    tipo_energia = db.Column(db.String(50), nullable=False)
+    lectura = db.Column(db.Numeric(10, 2), nullable=False)
+    fecha_registro = db.Column(db.Date, nullable=False)
     usuario = db.relationship('Usuarios', backref='datos')
 
 
@@ -65,8 +69,13 @@ def registro():
         )
         db.session.add(nuevo_usuario)
         db.session.commit()
-        return redirect(url_for('homeUser'))
-    return render_template('Usuarios/registro.html')
+
+        session['usuario_id'] = nuevo_usuario.id 
+
+        return redirect(url_for('homeUser')) 
+    
+    else:
+        return render_template('Usuarios/registro.html')
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -81,31 +90,74 @@ def login():
             return render_template('Usuarios/login.html', error=error)
 
         usuario = Usuarios.query.get(usuario.id)
+        session['usuario_id'] = usuario.id 
 
         if usuario.Roles.nombre != 'admin':
             return redirect(url_for('homeUser'))
         
         return redirect(url_for('homeAdmin'))
-
-    return render_template('Usuarios/login.html')
-
-
-
-@app.route('/homeAdmin', methods=['GET'])
-def homeAdmin():
-    return render_template('Admin/home.html')
+    
+    else:
+        return render_template('Usuarios/login.html')
 
 
-@app.route('/homeUser', methods=['GET'])
-def homeUser():
-    return render_template('Usuarios/home.html')
-
-
-@app.route('/formulario', methods=['GET', 'POST'])
-def formulario():
+@app.route('/registroDatos', methods=['GET', 'POST'])
+def registroDatos():
     if request.method == 'POST':
-        return redirect(url_for('home'))
-    return render_template('Datos/formulario.html')
+        tipoEnergia = request.form['tipo_energia']
+        fechaRegistro = request.form['fecha']
+        lectura = request.form['lectura']
+
+        usuario_id = session.get('usuario_id') 
+        if not usuario_id:
+            return redirect(url_for('login')) 
+
+        nuevo_dato = Datos(
+            usuario_id=usuario_id,  
+            tipo_energia=tipoEnergia,
+            lectura=lectura,
+            fecha_registro=datetime.strptime(fechaRegistro, '%Y-%m-%d').date()
+        )
+
+        db.session.add(nuevo_dato)
+        db.session.commit()
+        
+        return redirect(url_for('homeUser')) 
+    
+    else:
+        usuario_id = session.get('usuario_id') 
+        if not usuario_id:
+            return redirect(url_for('login')) 
+
+        return render_template('Datos/formulario.html')
+
+
+@app.route('/homeUser' )
+def homeUser():
+    usuario_id = session.get('usuario_id') 
+    usuario = Usuarios.query.get(usuario_id)
+
+    if not usuario_id:
+        return redirect(url_for('login')) 
+    
+    if usuario.Roles.nombre != 'usuario':
+        return redirect(url_for('homeAdmin')) 
+    
+    return render_template('Usuarios/home.html', usuario_id=usuario_id)
+    
+
+@app.route('/homeAdmin')
+def homeAdmin():
+    usuario_id = session.get('usuario_id') 
+    usuario = Usuarios.query.get(usuario_id)
+
+    if not usuario_id:
+        return redirect(url_for('login'))
+    
+    if usuario.Roles.nombre != 'admin':
+        return redirect(url_for('homeUser')) 
+    
+    return render_template('Admin/home.html', usuario_id=usuario_id)
 
 
 if __name__ == '__main__':
