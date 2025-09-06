@@ -15,7 +15,7 @@
 					<i class="bi bi-people-fill display-4 text-primary mb-3"></i>
 					<h5 class="card-title">Gestión de Usuarios</h5>
 					<p class="card-text">Ver, editar o eliminar usuarios registrados en el sistema.</p>
-					<a href="{{ url_for('homeAdmin') }}" class="btn btn-outline-primary">Gestionar Usuarios</a>
+					<a href="{{ url_for('registros') }}" class="btn btn-outline-primary">Gestionar Usuarios</a>
 				</div>
 			</div>
 		</div>
@@ -23,9 +23,19 @@
 			<div class="card border-0 shadow h-100">
 				<div class="card-body text-center">
 					<i class="bi bi-journal-check display-4 text-success mb-3"></i>
-					<h5 class="card-title">Registros de Consumo</h5>
-					<p class="card-text">Consulta y administra los registros de consumo energético de los usuarios.</p>
-					<a href="{{ url_for('homeAdmin') }}" class="btn btn-outline-success">Ver Registros</a>
+					<h5 class="card-title">Historial de logins</h5>
+					<p class="card-text">Consultar usuarios iniciaron sesion, ademnas de la fecha y la hora.</p>
+					<a href="{{ url_for('logins') }}" class="btn btn-outline-success">Ver Logins</a>
+				</div>
+			</div>
+		</div>
+		<div class="col-md-4">
+			<div class="card border-0 shadow h-100">
+				<div class="card-body text-center">
+					<i class="bi bi-journal-check display-4 text-success mb-3"></i>
+					<h5 class="card-title">Ingreso de Consumo</h5>
+					<p class="card-text">Consulta y registra consumos energéticos a los usuarios.</p>
+					<a href="{{ url_for('gestionConsumos') }}" class="btn btn-outline-success">Ingresar Consumos</a>
 				</div>
 			</div>
 		</div>
@@ -33,9 +43,9 @@
 			<div class="card border-0 shadow h-100">
 				<div class="card-body text-center">
 					<i class="bi bi-graph-up-arrow display-4 text-info mb-3"></i>
-					<h5 class="card-title">Reportes y Estadísticas</h5>
-					<p class="card-text">Visualiza reportes globales y estadísticas del sistema.</p>
-					<a href="{{ url_for('homeAdmin') }}" class="btn btn-outline-info">Ver Reportes</a>
+					<h5 class="card-title">Reportes de consumo</h5>
+					<p class="card-text">Lista de consumo de todos los usuarios.</p>
+					<a href="{{ url_for('listaConsumo') }}" class="btn btn-outline-info">Ver Consumos y editar</a>
 				</div>
 			</div>
 		</div>

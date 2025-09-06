@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-5">
+    <h2 class="mb-4">Registrar Consumo Energético (Admin)</h2>
+    <form method="POST" action="{{ url_for('gestionConsumos') }}">
+        <div class="mb-3">
+            <label for="usuario_id" class="form-label">Usuario</label>
+            <select class="form-select" id="usuario_id" name="usuario_id" required>
+                <option value="">Selecciona un usuario</option>
+                {% for usuario in usuarios %}
+                <option value="{{ usuario.id }}">{{ usuario.nombre }} ({{ usuario.correo }})</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="mb-3">
+            <label for="tipo_energia" class="form-label">Tipo de Energía</label>
+            <select class="form-select" id="tipo_energia" name="tipo_energia" required>
+                <option value="">Selecciona una opción</option>
+                <option value="Eléctrica">Eléctrica</option>
+                <option value="Gas">Gas</option>
+                <option value="Agua">Agua</option>
+            </select>
+        </div>
+        <div class="mb-3">
+            <label for="lectura" class="form-label">Lectura</label>
+            <input type="number" step="0.01" class="form-control" id="lectura" name="lectura" required>
+        </div>
+        <div class="mb-3">
+            <label for="fecha" class="form-label">Fecha de Registro</label>
+            <input type="date" class="form-control" id="fecha" name="fecha" required>
+        </div>
+        <button type="submit" class="btn btn-success">Registrar</button>
+        <a href="{{ url_for('homeAdmin') }}" class="btn btn-secondary ms-2">Cancelar</a>
+    </form>
+    {% if error %}
+    <div class="alert alert-danger mt-3">{{ error }}</div>
+    {% endif %}
+</div>
+{% endblock %}

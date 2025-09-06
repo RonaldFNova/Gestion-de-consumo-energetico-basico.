@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, redirect, url_for, session
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
+from sqlalchemy.sql import func
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///GestionEnergia.db'
@@ -30,7 +31,7 @@ class Usuarios(db.Model):
 class Login(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     usuario_id = db.Column(db.Integer, db.ForeignKey('usuarios.id'), nullable=False)
-    fecha_hora = db.Column(db.DateTime, default=datetime)
+    fecha_hora = db.Column(db.DateTime, default=func.now())
     usuario = db.relationship('Usuarios', backref='logins')
 
 class Datos(db.Model):
@@ -44,7 +45,18 @@ class Datos(db.Model):
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    usuario_id = session.get('usuario_id')
+
+    if not usuario_id:
+        return render_template('index.html') 
+
+    usuario = Usuarios.query.get(usuario_id)
+    
+    if usuario.Roles.nombre == 'usuario':
+        return redirect(url_for('homeUser')) 
+    
+    if usuario.Roles.nombre == 'admin':
+        return redirect(url_for('homeAdmin'))
 
 
 @app.route('/registro', methods=['GET', 'POST'])
@@ -91,6 +103,11 @@ def login():
         usuario = Usuarios.query.get(usuario.id)
         session['usuario_id'] = usuario.id 
 
+        nuevo_login = Login(usuario_id=usuario.id)
+
+        db.session.add(nuevo_login)
+        db.session.commit()
+
         if usuario.Roles.nombre != 'admin':
             return redirect(url_for('homeUser'))
         
@@ -120,7 +137,7 @@ def registroDatos():
 
         db.session.add(nuevo_dato)
         db.session.commit()
-            
+    
     else:
         usuario_id = session.get('usuario_id') 
         if not usuario_id:
@@ -181,29 +198,21 @@ def cerrarSesion():
 
 @app.route('/editarPerfil', methods=['GET', 'POST'])
 def editarPerfil():
+
+    usuario_id = session.get('usuario_id') 
+    usuario = Usuarios.query.get(usuario_id)
+
+    if not usuario_id:
+        return redirect(url_for('login'))
+    
+    if usuario.Roles.nombre != 'usuario':
+        return redirect(url_for('homeAdmin')) 
+
     if request.method == 'GET':
           
-        usuario_id = session.get('usuario_id') 
-        usuario = Usuarios.query.get(usuario_id)
-
-        if not usuario_id:
-            return redirect(url_for('login'))
-    
-        if usuario.Roles.nombre != 'usuario':
-            return redirect(url_for('homeAdmin')) 
-        
         return render_template('Usuarios/editarPerfil.html')
     
     else:
-        usuario_id = session.get('usuario_id') 
-        usuario = Usuarios.query.get(usuario_id)
-
-        if not usuario_id:
-            return redirect(url_for('login'))
-    
-        if usuario.Roles.nombre != 'usuario':
-            return redirect(url_for('homeAdmin')) 
-
         actual = request.form['actual']
         nueva = request.form['nueva']
         confirmar = request.form['confirmar']
@@ -220,6 +229,190 @@ def editarPerfil():
         db.session.commit()
 
         return redirect(url_for('homeUser'))
+
+
+@app.route('/logins', methods=['GET'])
+def logins():
+    usuario_id = session.get('usuario_id')
+    usuario = Usuarios.query.get(usuario_id)
+
+    if not usuario_id:
+        return redirect(url_for('login')) 
+    
+    if usuario.Roles.nombre != 'admin':
+        return redirect(url_for('homeUser'))
+
+    if request.method == 'GET':
+
+        registros_logins = Login.query.all()
+        return render_template('Admin/gestionLogins.html', logins=registros_logins)
+
+
+@app.route('/registros', methods=['GET'])
+def registros():
+    usuario_id = session.get('usuario_id')
+    usuario = Usuarios.query.get(usuario_id)
+
+    if not usuario_id:
+        return redirect(url_for('login')) 
+    
+    if usuario.Roles.nombre != 'admin':
+        return redirect(url_for('homeUser'))
+
+    if request.method == 'GET':
+
+        registros_usuarios = Usuarios.query.all()
+        return render_template('Admin/gestionRegistros.html', usuarios=registros_usuarios)
+
+
+@app.route('/editarUsuario/<int:usuario_id>', methods=['GET', 'POST'])
+def editarUsuario(usuario_id):
+    usuario_sesion_id = session.get('usuario_id') 
+    usuario_sesion = Usuarios.query.get(usuario_sesion_id)
+
+    if not usuario_sesion_id:
+        return redirect(url_for('login'))
+
+    if usuario_sesion.Roles.nombre != 'admin':
+        return redirect(url_for('homeUser')) 
+
+    usuario = Usuarios.query.get(usuario_id)
+    if not usuario:
+        return "Usuario no encontrado", 404
+
+    if request.method == 'POST':
+        nombre = request.form['nombre']
+        correo = request.form['correo']
+        rol_id = request.form['rol']  
+
+        correo_existente = Usuarios.query.filter(Usuarios.correo == correo, Usuarios.id != usuario.id).first()
+        if correo_existente:
+            error = 'El correo ya está registrado por otro usuario'
+            return render_template('Admin/editarUsuario.html', usuario=usuario, error=error)
+
+        rol = Roles.query.get(rol_id) 
+
+        if not rol:
+            error = 'Rol no válido'
+            return render_template('Admin/editarUsuario.html', usuario=usuario, error=error)
+
+        usuario.nombre = nombre
+        usuario.correo = correo
+        usuario.Roles_id = rol.id
+
+        if request.form['password']: 
+            usuario.password = request.form['password']
+
+        db.session.commit()
+        return redirect(url_for('registros'))
+
+    return render_template('Admin/editarUsuario.html', usuario=usuario,roles=Roles.query.all())
+
+
+@app.route('/gestionConsumos', methods=['POST', 'GET'])
+def gestionConsumos():
+    usuario_id = session.get('usuario_id')
+    usuario = Usuarios.query.get(usuario_id)
+
+    if not usuario_id:
+        return redirect(url_for('login')) 
+    
+    if usuario.Roles.nombre != 'admin':
+        return redirect(url_for('homeUser'))
+
+    if request.method == 'GET':
+
+        usuarios = Usuarios.query.all()
+        return render_template('Admin/gestionConsumo.html', usuarios=usuarios)
+    
+    if request.method == 'POST':
+        usuario_id = request.form['usuario_id']
+        usuario = Usuarios.query.get(usuario_id)
+        if not usuario:
+            return "Usuario no encontrado", 404
+
+        tipoEnergia = request.form['tipo_energia']
+        fechaRegistro = request.form['fecha']
+        lectura = request.form['lectura']
+
+        nuevo_dato = Datos(
+            usuario_id=usuario.id,  
+            tipo_energia=tipoEnergia,
+            lectura=lectura,
+            fecha_registro=datetime.strptime(fechaRegistro, '%Y-%m-%d').date()
+        )
+
+        db.session.add(nuevo_dato)
+        db.session.commit()
+
+        return redirect(url_for('gestionConsumos'))
+
+
+@app.route('/listaConsumo', methods=['GET'])
+def listaConsumo():
+    usuario_id = session.get('usuario_id')
+    usuario = Usuarios.query.get(usuario_id)
+
+    if not usuario_id:
+        return redirect(url_for('login')) 
+    
+    if usuario.Roles.nombre != 'admin':
+        return redirect(url_for('homeUser'))
+
+    if request.method == 'GET':
+        consumos = Datos.query.all()
+        return render_template('Admin/listaConsumo.html', consumos=consumos)
+    
+
+@app.route('/editarConsumo/<int:consumo_id>', methods=['POST'])
+def editarConsumo(consumo_id):
+    usuario_sesion_id = session.get('usuario_id') 
+    usuario_sesion = Usuarios.query.get(usuario_sesion_id)
+
+    if not usuario_sesion_id:
+        return redirect(url_for('login'))
+
+    if usuario_sesion.Roles.nombre != 'admin':
+        return redirect(url_for('homeUser')) 
+
+    consumo = Datos.query.get(consumo_id)
+    if not consumo:
+        return "Consumo no encontrado", 404
+
+    if request.method == 'POST':
+        tipoEnergia = request.form['tipo_energia']
+        fechaRegistro = request.form['fecha']
+        lectura = request.form['lectura']
+
+        consumo.tipo_energia = tipoEnergia
+        consumo.fecha_registro = datetime.strptime(fechaRegistro, '%Y-%m-%d').date()
+        consumo.lectura = lectura
+
+        db.session.commit()
+        return redirect(url_for('listaConsumo'))
+
+    return render_template('Admin/editarConsumo.html', consumo=consumo)
+
+
+@app.route('/eliminarConsumo/<int:consumo_id>', methods=['GET'])
+def eliminarConsumo(consumo_id):
+    usuario_sesion_id = session.get('usuario_id') 
+    usuario_sesion = Usuarios.query.get(usuario_sesion_id)
+
+    if not usuario_sesion_id:
+        return redirect(url_for('login'))
+
+    if usuario_sesion.Roles.nombre != 'admin':
+        return redirect(url_for('homeUser')) 
+
+    if request.method == 'GET':
+        consumo = Datos.query.get(consumo_id)
+        if not consumo:
+            return "Consumo no encontrado", 404
+
+        db.session.delete(consumo)
+        db.session.commit()
+        return redirect(url_for('listaConsumo'))
 
 
 if __name__ == '__main__':

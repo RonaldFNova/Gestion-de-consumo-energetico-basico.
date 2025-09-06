@@ -21,7 +21,7 @@
 							<label for="actual" class="form-label">Contraseña Actual</label>
 							<div class="input-group">
 								<input type="password" class="form-control" id="actual" name="actual" required>
-								<button class="btn btn-outline-secondary" type="button" onclick="mostrarContraseñ('actual')">
+								<button class="btn btn-outline-secondary" type="button" onclick="mostrarContrasena('actual')">
 								</button>
 							</div>
 						</div>
@@ -29,7 +29,7 @@
 							<label for="nueva" class="form-label">Nueva Contraseña</label>
 							<div class="input-group">
 								<input type="password" class="form-control" id="nueva" name="nueva" required>
-								<button class="btn btn-outline-secondary" type="button" onclick="mostrarContraseñ('nueva')">
+								<button class="btn btn-outline-secondary" type="button" onclick="mostrarContrasena('nueva')">
 								</button>
 							</div>
 						</div>
@@ -37,7 +37,7 @@
 							<label for="confirmar" class="form-label">Confirmar Nueva Contraseña</label>
 							<div class="input-group">
 								<input type="password" class="form-control" id="confirmar" name="confirmar" required>
-								<button class="btn btn-outline-secondary" type="button" onclick="mostrarContraseñ('confirmar')">
+								<button class="btn btn-outline-secondary" type="button" onclick="mostrarContrasena('confirmar')">
 								</button>
 							</div>
 						</div>
@@ -55,7 +55,7 @@
 </div>
 
 <script>
-    function mostrarContraseñ(inputId) {
+    function mostrarContrasena(inputId) {
         const input = document.getElementById(inputId);
     
         if (input.type === "password") {

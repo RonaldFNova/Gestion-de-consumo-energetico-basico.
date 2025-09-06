@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-5">
+    <h2 class="mb-4">Editar Consumo</h2>
+    <form method="POST" action="{{ url_for('editarConsumo', consumo_id=consumo.id) }}">
+        <div class="mb-3">
+            <label class="form-label">Usuario</label>
+            <input type="text" class="form-control" value="{{ consumo.usuario.nombre }} ({{ consumo.usuario.correo }})" disabled>
+        </div>
+        <div class="mb-3">
+            <label for="tipo_energia" class="form-label">Tipo de Energía</label>
+            <select class="form-select" id="tipo_energia" name="tipo_energia" required>
+                <option value="Eléctrica" {% if consumo.tipo_energia == 'Eléctrica' %}selected{% endif %}>Eléctrica</option>
+                <option value="Gas" {% if consumo.tipo_energia == 'Gas' %}selected{% endif %}>Gas</option>
+                <option value="Agua" {% if consumo.tipo_energia == 'Agua' %}selected{% endif %}>Agua</option>
+            </select>
+        </div>
+        <div class="mb-3">
+            <label for="lectura" class="form-label">Lectura</label>
+            <input type="number" step="0.01" class="form-control" id="lectura" name="lectura" value="{{ consumo.lectura }}" required>
+        </div>
+        <div class="mb-3">
+            <label for="fecha" class="form-label">Fecha de Registro</label>
+            <input type="date" class="form-control" id="fecha" name="fecha" value="{{ consumo.fecha_registro.strftime('%Y-%m-%d') }}" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+        <a href="{{ url_for('listaConsumo') }}" class="btn btn-secondary ms-2">Cancelar</a>
+    </form>
+    {% if error %}
+    <div class="alert alert-danger mt-3">{{ error }}</div>
+    {% endif %}
+</div>
+{% endblock %}
